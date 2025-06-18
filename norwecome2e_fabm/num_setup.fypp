@@ -11,8 +11,8 @@
 #:set NB_DIATOMS = 10
 #:set NB_COPST = 7
 
-#:set NB_COPPAS = 1 
-#:set NB_COPPAS_AS = [0.0394]
+#:set NB_COPPAS = 3 
+#:set NB_COPPAS_AS = [0.0394, 0.136, 5.0]
 
 #:set NB_COPACT = 6
 #:set NB_COPACT_AS = [0.0409, 0.2785, 1.8974, 12.9266, 88.068, 600.]
