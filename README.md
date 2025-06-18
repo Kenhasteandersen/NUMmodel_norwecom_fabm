@@ -28,25 +28,26 @@ if [ "$HOSTNAME" = anhur.hi.no ]; then
 fi
 ```
 
-## Download GOTM
+## Download 
 
 ```bash
+# Clone the repository:
+git clone https://github.com/Kenhasteandersen/NUMmodel_norwecom_fabm.git
+
 # Clone external dependencies: gotm, fabm, and NUM:
 git submodule update --init --recursive
 ```
 
-Possibly update the NUMmodel submodule??
-
 If the input file in NUM has changed, you might want to copy it to `input/input.h`
 
-## Compile GOTM with FABM
+## Compile
 
 Make a build directory:
 ```bash
 mkdir build
 ```
 
-For the following instructions, it is assumed that the directory structure is as follows. Make the necessary adjustments if your directory structure differs.
+For the following instructions, it is assumed that the directory structure is as follows. Make the necessary adjustments if your directory structure differs:
 
 ```bash
 a5482@anhur ~/Temp $ tree -d -L 1
@@ -66,11 +67,8 @@ cmake -DFABM_INSTITUTES="imr;gotm" -DFABM_IMR_BASE=../norwecome2e_fabm ../gotm
 make
 ```
 
-If the linking step fails to find netcdf
-
-## Todo elsewhere
-The linker cannot find `netcdf`. Therefore linking has to manually add the path to the library. 
-This is done by adding `-DCMAKE_VERBOSE_MAKEFILE=on` to `cmake`to get the linker step, and then paste the path to the library into the linking step.
+If the linking step fails to find the netcdf library then linking has to be done manually.
+This is done by adding `-DCMAKE_VERBOSE_MAKEFILE=on` to `cmake`. While doing the `make` the last step is the linker step. Copy that, and paste the path to the library into it and link manually.
 
 
 ## Run test model
