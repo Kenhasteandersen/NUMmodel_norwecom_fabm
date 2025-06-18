@@ -77,6 +77,6 @@ make
 ## Run test model
 
 Run by going into the `station_test` directory:
-`../build/gotm --ignore_unknown_config``
+`../build/gotm --ignore_unknown_config`
 
 
