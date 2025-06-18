@@ -35,6 +35,7 @@ fi
 git clone https://github.com/Kenhasteandersen/NUMmodel_norwecom_fabm.git
 
 # Clone external dependencies: gotm, fabm, and NUM:
+cd NUMmodel_norwecom_fabm
 git submodule update --init --recursive
 ```
 
@@ -50,8 +51,6 @@ mkdir build
 For the following instructions, it is assumed that the directory structure is as follows. Make the necessary adjustments if your directory structure differs:
 
 ```bash
-a5482@anhur ~/Temp $ tree -d -L 1
-.
 ├── build # Holds the build files
 ├── gotm # <- Holds the gotm and fabm framework source code
 ├── input # <- Holds the NUM input file
@@ -75,5 +74,3 @@ This is done by adding `-DCMAKE_VERBOSE_MAKEFILE=on` to `cmake`. While doing the
 
 Run by going into the `station_test` directory:
 `../build/gotm --ignore_unknown_config`
-
-
