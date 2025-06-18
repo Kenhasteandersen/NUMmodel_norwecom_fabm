@@ -1,0 +1,231 @@
+#:include "num_setup.fypp"
+#include "fabm_driver.h"
+
+module imr_norwecom_num
+
+    use fabm_types
+    use globals, only: dp, rhoCN
+    use NUMmodel
+
+    implicit none
+    private
+
+    ! NUM variables
+    real(dp), allocatable :: u(:)
+    real(dp), allocatable :: dudt(:)
+    character(len=20) :: errorstr
+    logical(1) :: errorio = .false.
+
+    ! FABM variables
+    type, extends(type_base_model), public :: type_imr_norwecom_num
+        ! Declare size-structured state variables
+        #:if GENERALISTS == True
+            #:for i in range(NB_GENERALISTS)
+                type(type_state_variable_id) :: id_gen${i+1}$ !! Generalists ${i+1}$ [ugC l-1]
+            #:endfor
+        #:endif
+        #:if POM == True
+            #:for i in range(NB_POM)
+                type(type_state_variable_id) :: id_pom${i+1}$ !! Particulate organic carbon ${i+1}$ [ugC l-1]
+            #:endfor
+        #:endif
+
+        ! Declare other state variables
+        type(type_state_variable_id) :: id_no3 !! Nitrate [ugN l-1]
+        type(type_state_variable_id) :: id_doc !! Dissolved inorganic carbon [ugC l-1]
+
+        ! Declare dependencies
+        type(type_dependency_id) :: id_temp !! Temperature [degC]
+        type(type_dependency_id) :: id_par !! Photoactive radition
+
+        ! Declare diagnostic variables
+        type(type_diagnostic_variable_id) :: id_chla_total !! Chlorophyll a concentration [ugChla l-1]
+        type(type_diagnostic_variable_id) :: id_gen_total !! Generalists concentration [ugC l-1]
+        type(type_diagnostic_variable_id) :: id_pom_total !! Particulate organic matter concentration [ugC l-1]
+    contains
+        procedure :: initialize
+        procedure :: do
+        procedure :: get_vertical_movement
+    end type type_imr_norwecom_num
+
+contains
+
+    subroutine initialize(self, configunit)
+        class(type_imr_norwecom_num), intent(inout), target :: self
+        integer, intent(in) :: configunit
+
+        ! Initialize size-structured state variables
+        #:if GENERALISTS == True
+            #:for i in range(NB_GENERALISTS)
+                call self%register_state_variable(self%id_gen${i+1}$, &
+                    "gen${i+1}$", "ugC l-1", "Generalists size group ${i+1}$", &
+                    minimum = 0.0_rk, initial_value = 0.005_rk)
+            #:endfor
+        #:endif
+        #:if POM == True
+            #:for i in range(NB_POM)
+                call self%register_state_variable(self%id_pom${i+1}$, &
+                    "pom${i+1}$", "ugC l-1", "Particulate organic matter size group ${i+1}$", &
+                    minimum = 0.0_rk, initial_value = 0.005_rk)
+            #:endfor
+        #:endif
+
+        ! Initialize other state variables
+        call self%register_state_variable(self%id_no3, &
+            "no3", "ugN l-1", "Nitrate concentration", &
+            minimum = 0.0_rk, initial_value = 150.0_rk)
+        call self%register_state_variable(self%id_doc, &
+            "doc", "ugC l-1", "Dissolved inorganic carbon concentration", &
+            minimum = 0.0_rk, initial_value = 150.0_rk)
+
+        ! Initialize dependencies
+        call self%register_dependency(self%id_temp, standard_variables%temperature)
+        call self%register_dependency(self%id_par, standard_variables%downwelling_photosynthetic_radiative_flux)
+
+        ! Initialize diagnostic variables
+        call self%register_diagnostic_variable(self%id_chla_total, "chla_total", "ugChla l-1", "Chlorophyll a")
+        call self%register_diagnostic_variable(self%id_gen_total, "gen_total", "ugC l-1", "Generalists")
+        call self%register_diagnostic_variable(self%id_pom_total, "pom_total", "ugC l-1", "POM")
+
+        ! Initialize NUM model
+        call initialize_num_model()
+        allocate(u(nGrid))
+        allocate(dudt(nGrid))
+    end subroutine initialize
+
+    subroutine initialize_num_model()
+        #:if GENERALISTS == True & POM == False
+            call setupGeneralistsOnly(${NB_GENERALISTS}$, errorio, errorstr)
+        #:elif GENERALISTS == True & POM == True
+            call setupGeneralistsPOM(${NB_GENERALISTS}$, ${NB_POM}$, errorio, errorstr)
+        #:endif
+        if (errorio .eqv. .true.) then
+            print *, "Error reading parameter ", errorstr
+            stop
+        end if
+    end subroutine initialize_num_model
+
+    subroutine do(self, _ARGUMENTS_DO_)
+        class(type_imr_norwecom_num), intent(in) :: self
+        _DECLARE_ARGUMENTS_DO_
+
+        ! Local variables
+        real(rk) :: par, temp, gen_total, pom_total
+        integer :: iGroup
+
+        _LOOP_BEGIN_
+
+        ! Reset arrays
+        u = 0.0
+        dudt = 0.0
+
+        ! Get local copy of state variables
+
+        ! First nutrient and generalists as they use their own indexing
+        _GET_(self%id_no3, u(idxN))
+        _GET_(self%id_doc, u(idxDOC))
+        #:if GENERALISTS == True
+            #:for i in range(NB_GENERALISTS)
+                _GET_(self%id_gen${i+1}$, u(idxB+${i}$))
+            #:endfor
+        #:endif
+
+        ! Then we get the other groups (using ixStart)
+        do iGroup = 1, nGroups
+            select type(spec => group(iGroup)%spec)
+            type is(spectrumPOM)
+                #:if POM == True
+                    #:for i in range(NB_POM)
+                        _GET_(self%id_pom${i+1}$, u(ixStart(iGroup)+${i}$))
+                    #:endfor
+                #:endif
+            end select
+        end do
+
+        ! Lastly we get the environmental dependencies
+        _GET_(self%id_temp, temp)
+        _GET_(self%id_par, par)
+
+        ! Convert photosynthetic radiative flux
+        par = par / 0.217 ! W m-2 -> umol m-2 s-1
+
+        ! Perform daystep in NUM
+        call calcDerivatives(u, par, temp, 1.0_dp, dudt)
+        _SET_DIAGNOSTIC_(self%id_chla_total, calc_chla(par))
+
+        ! Update rates in FABM
+        #:if GENERALISTS
+            gen_total = 0.0
+            #:for i in range(NB_GENERALISTS)
+                gen_total = gen_total + real(u(idxB+${i}$), kind=rk)
+                _ADD_SOURCE_(self%id_gen${i+1}$, real(dudt(idxB+${i}$), kind=rk)/86400.0)
+            #:endfor
+            _SET_DIAGNOSTIC_(self%id_gen_total, gen_total)
+        #:endif
+        do iGroup = 1, nGroups
+            select type(spec => group(iGroup)%spec)
+            type is(spectrumPOM)
+                #:if POM == True
+                    pom_total = 0.0
+                    #:for i in range(NB_POM)
+                        pom_total = pom_total + real(u(ixStart(iGroup)+${i}$), kind=rk)
+                        _ADD_SOURCE_(self%id_pom${i+1}$, real(dudt(ixStart(iGroup)+${i}$), kind=rk)/86400.0)
+                    #:endfor
+                    _SET_DIAGNOSTIC_(self%id_pom_total, pom_total)
+                #:endif
+            end select
+        end do
+        _ADD_SOURCE_(self%id_no3, real(dudt(idxN), kind=rk)/86400.0)
+        _ADD_SOURCE_(self%id_doc, real(dudt(idxDOC), kind=rk)/86400.0)
+
+        _LOOP_END_
+    end subroutine do
+
+    subroutine get_vertical_movement(self, _ARGUMENTS_GET_VERTICAL_MOVEMENT_)
+        class(type_imr_norwecom_num), intent(in) :: self
+        _DECLARE_ARGUMENTS_GET_VERTICAL_MOVEMENT_
+
+        ! Local variables
+        integer :: iGroup
+        real(rk) :: r, vpom
+
+        _LOOP_BEGIN_
+
+        do iGroup = 1, nGroups
+            select type(spec => group(iGroup)%spec)
+            type is(spectrumPOM)
+                #:if POM == True
+                    #:for i in range(NB_POM)
+                        ! Sinking according to Stoke's Law (See Kiørboe 1993)
+                        r = real(((3.0/(4.0*pi)*spec%m(${i+1}$)/0.4d-6)**onethird), kind=rk)
+                        vpom = 1091.0*(r/1000000*10)**2
+                        _SET_VERTICAL_MOVEMENT_(self%id_pom${i+1}$, -vpom)
+                    #:endfor
+                #:endif
+            end select
+        end do
+
+        _LOOP_END_
+    end subroutine get_vertical_movement
+
+    function calc_chla(l) result(chla)
+        real(rk), intent(in) :: l !! Light
+        real(rk) :: chla !! Chlorophyll concentration [ugChla l-1]
+
+        ! Local variables
+        integer :: iGroup
+        chla = 0.0
+        
+        do iGroup = 1, nGroups
+            select type(spec => group(iGroup)%spec)
+            type is(spectrumGeneralists)
+                #:if GENERALISTS == True
+                    #:for i in range(NB_GENERALISTS)
+                        chla = chla + max(0.0, (real(u(idxB+${i}$)*spec%JLreal(${i+1}$), kind=rk))/l)
+                    #:endfor
+                #:endif
+            end select
+        end do
+    end function calc_chla
+
+end module imr_norwecom_num
