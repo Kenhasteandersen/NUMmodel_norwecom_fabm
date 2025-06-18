@@ -164,7 +164,7 @@ contains
         ! A generic setup with generalists, diatoms and copepods
         !call setupGenDiatCope(${NB_GENERALISTS}$,${NB_COPST}$,${NB_POM}$,${NB_COPACT_AS}$*1.0_dp, errorio, errorstr)
         ! Full NUM model setup with generalists, copepods, and POM
-        call setupNUMmodel(${NB_GENERALISTS}$,${NB_DIATOMS}$,${NB_COPST}$,${NB_POM}$,${NB_COPPAS_AS}$*1.0_dp,${NB_COPACT_AS}$*1.0_dp, errorio, errorstr)
+        call setupNUMmodel(${NB_GENERALISTS}$,${NB_DIATOMS}$,${NB_COPST}$,${NB_COPPAS_AS}$*1.0_dp,${NB_COPACT_AS}$*1.0_dp, errorio, errorstr)
           !!!subroutine setupNUMmodel(n, nDiatoms, nCopepod, nPOM, mAdultPassive, mAdultActive,errorio,errorstr)
         
         if (errorio .eqv. .true.) then

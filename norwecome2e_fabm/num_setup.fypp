@@ -7,7 +7,7 @@
 #:set COPEPOD_ACTIVE = True
 
 #:set NB_GENERALISTS = 10
-#:set NB_POM = 2
+#:set NB_POM = 1
 #:set NB_DIATOMS = 10
 #:set NB_COPST = 7
 
