@@ -28,18 +28,10 @@ if [ "$HOSTNAME" = anhur.hi.no ]; then
 fi
 ```
 
-## Todo elsewhere
-The linker cannot find `netcdf`. Therefore linking has to manually add the path to the library. 
-This is done by adding `-DCMAKE_VERBOSE_MAKEFILE=on` to `cmake`to get the linker step, and then paste the path to the library into the linking step.
-
 ## Download GOTM
 
 ```bash
-# Clone the GOTM repository
-git clone https://github.com/gotm-model/code.git gotm
-
-# Clone FABM as well as other external dependencies
-cd gotm
+# Clone external dependencies: gotm, fabm, and NUM:
 git submodule update --init --recursive
 ```
 
@@ -51,7 +43,7 @@ If the input file in NUM has changed, you might want to copy it to `input/input.
 
 Make a build directory:
 ```bash
-mkdir -p build
+mkdir build
 ```
 
 For the following instructions, it is assumed that the directory structure is as follows. Make the necessary adjustments if your directory structure differs.
@@ -73,6 +65,13 @@ cd build
 cmake -DFABM_INSTITUTES="imr;gotm" -DFABM_IMR_BASE=../norwecome2e_fabm ../gotm
 make
 ```
+
+If the linking step fails to find netcdf
+
+## Todo elsewhere
+The linker cannot find `netcdf`. Therefore linking has to manually add the path to the library. 
+This is done by adding `-DCMAKE_VERBOSE_MAKEFILE=on` to `cmake`to get the linker step, and then paste the path to the library into the linking step.
+
 
 ## Run test model
 
