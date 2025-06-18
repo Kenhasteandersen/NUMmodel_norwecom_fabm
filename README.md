@@ -32,25 +32,20 @@ fi
 The linker cannot find `netcdf`. Therefore linking has to manually add the path to the library. 
 This is done by adding `-DCMAKE_VERBOSE_MAKEFILE=on` to `cmake`to get the linker step, and then paste the path to the library into the linking step.
 
-## Download `norwecome2e_fabm`
-
-```bash
-git clone git@git.imr.no:norwecome2e/norwecome2e_fabm.git
-```
-
 ## Download GOTM
 
 ```bash
 # Clone the GOTM repository
 git clone https://github.com/gotm-model/code.git gotm
 
-# Checkout the latest stable release (v6.0.6; 2024-01-18)
-cd gotm
-git checkout v6.0.6 -b stable
-
 # Clone FABM as well as other external dependencies
+cd gotm
 git submodule update --init --recursive
 ```
+
+Possibly update the NUMmodel submodule??
+
+If the input file in NUM has changed, you might want to copy it to `input/input.h`
 
 ## Compile GOTM with FABM
 
@@ -66,9 +61,9 @@ a5482@anhur ~/Temp $ tree -d -L 1
 .
 ├── build # Holds the build files
 ├── gotm # <- Holds the gotm and fabm framework source code
-└── norwecome2e_fabm # <- Holds the norwecome2e_fabm source code
-
-2 directories
+├── input # <- Holds the NUM input file
+├── norwecome2e_fabm # <- Holds the norwecome2e_fabm source code
+└── station_test # <- Holds the test site
 ```
 
 Compile using `cmake` and `make`:
