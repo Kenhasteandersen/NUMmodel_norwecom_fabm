@@ -74,6 +74,8 @@ cmake -DFABM_INSTITUTES="imr;gotm" -DFABM_IMR_BASE=../norwecome2e_fabm ../gotm
 make
 ```
 
+## Run test model
+
 Run by going into the `station_test` directory:
 `../build/gotm --ignore_unknown_config``
 
