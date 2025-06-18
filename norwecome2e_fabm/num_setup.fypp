@@ -1,0 +1,20 @@
+#:mute 
+
+#:set GENERALISTS = True
+#:set POM = True
+#:set DIATOMS = True
+#:set COPEPOD_PASSIVE = True
+#:set COPEPOD_ACTIVE = True
+
+#:set NB_GENERALISTS = 10
+#:set NB_POM = 2
+#:set NB_DIATOMS = 10
+#:set NB_COPST = 7
+
+#:set NB_COPPAS = 1 
+#:set NB_COPPAS_AS = [0.0394]
+
+#:set NB_COPACT = 6
+#:set NB_COPACT_AS = [0.0409, 0.2785, 1.8974, 12.9266, 88.068, 600.]
+
+#:endmute
