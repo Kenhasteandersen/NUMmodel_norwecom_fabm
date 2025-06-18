@@ -2,6 +2,7 @@
 
 An implementation of the Norwegian Ecological Modeling System End-To-End (NORWECOM.E2E) in the Framework for Aquatic Biogeochemical Models (FABM). Used in the PELAGIC project
 
+## Todo at IMR:
 On the anhur.hi.no terminal server the following setup is necessary:
 
 ```bash
@@ -26,6 +27,10 @@ if [ "$HOSTNAME" = anhur.hi.no ]; then
     export PATH=/data/osea/norwecom.e2e.forcing/fabm/bin:$PATH
 fi
 ```
+
+## Todo elsewhere
+The linker cannot find `netcdf`. Therefore linking has to manually add the path to the library. 
+This is done by adding `-DCMAKE_VERBOSE_MAKEFILE=on` to `cmake`to get the linker step, and then paste the path to the library into the linking step.
 
 ## Download `norwecome2e_fabm`
 
