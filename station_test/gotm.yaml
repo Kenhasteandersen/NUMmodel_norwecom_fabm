@@ -1,0 +1,270 @@
+version: 7
+title: GOTM simulation
+location:
+  name: Station M
+  latitude: 66.0
+  longitude: 2.0
+  depth: 90
+time:
+  start: 2022-01-01 12:00:00
+  stop: 2024-12-10 00:00:00
+  dt: 3600.0
+grid:
+  nlev: 10
+  method: file_h
+  ddu: 1.0
+  ddl: 1.0
+  file: grid.dat.red
+temperature:
+  method: file
+  constant_value: 0.0
+  file: roms_T_StnM_2018_2024.dat
+  column: 1
+  two_layer:
+    z_s: 0.0
+    t_s: 0.0
+    z_b: 0.0
+    t_b: 0.0
+  NN: 0.0
+  relax:
+    tau: 86400
+salinity:
+  method: file
+  constant_value: 0.0
+  file: roms_S_StnM_2018_2024.dat
+  column: 1
+  two_layer:
+    z_s: 0.0
+    s_s: 0.0
+    z_b: 0.0
+    s_b: 0.0
+  NN: 0.0
+  relax:
+    tau: 86400
+surface:
+  fluxes:
+    method: fairall
+    heat:
+      method: constant
+      constant_value: 0.0
+      file:
+      column: 1
+    tx:
+      method: constant
+      constant_value: 0.0
+      file:
+      column: 1
+    ty:
+      method: constant
+      constant_value: 0.0
+      file:
+      column: 1
+  u10:
+    method: file
+    constant_value: 0.0
+    file: meteo_arome_StnM_2018_2024.dat
+    column: 1
+  v10:
+    method: file
+    constant_value: 0.0
+    file: meteo_arome_StnM_2018_2024.dat
+    column: 2
+  airp:
+    method: file
+    constant_value: 0.0
+    file: meteo_arome_StnM_2018_2024.dat
+    column: 3
+  airt:
+    method: file
+    constant_value: 0.0
+    file: meteo_arome_StnM_2018_2024.dat
+    column: 4
+  hum:
+    method: file
+    constant_value: 0.0
+    file: meteo_arome_StnM_2018_2024.dat
+    column: 5
+    type: dew_point
+  cloud:
+    method: file
+    constant_value: 0.0
+    file: meteo_arome_StnM_2018_2024.dat
+    column: 6
+  precip:
+    method: file
+    constant_value: 0.0
+    file: meteo_arome_StnM_2018_2024.dat
+    column: 7
+    flux_impact: false
+  calc_evaporation: false
+  swr:
+    method: file
+    constant_value: 0.0
+    file: meteo_arome_rad_StnM_2018_2024.dat
+    column: 1
+  longwave_radiation:
+    method: file
+    file: meteo_arome_rad_StnM_2018_2024.dat
+    column: 2
+  albedo:
+    method: payne
+    constant_value: 0.0
+  roughness:
+    charnock: false
+    charnock_val: 1400.0
+    z0s_min: 0.02
+bottom:
+  h0b: 0.05
+light_extinction:
+  method: jerlov-i
+  A:
+    method: constant
+    constant_value: 0.7
+    file:
+    column: 1
+  g1:
+    method: constant
+    constant_value: 0.4
+    file:
+    column: 1
+  g2:
+    method: constant
+    constant_value: 8.0
+    file:
+    column: 1
+turbulence:
+  turb_method: second_order
+  tke_method: tke
+  len_scale_method: dissipation
+  stab_method: schumann_gerz
+  turb_param:
+    cm0_fix: 0.5477
+    Prandtl0_fix: 0.74
+    cw: 100.0
+    compute_kappa: false
+    kappa: 0.4
+    compute_c3: true
+    Ri_st: 0.25
+    length_lim: true
+    galp: 0.27
+    const_num: 0.0005
+    const_nuh: 0.0005
+    k_min: 1.0e-10
+    eps_min: 1.0e-12
+    kb_min: 1.0e-10
+    epsb_min: 1.0e-14
+mimic_3d:
+  ext_pressure:
+    type: elevation
+    dpdx:
+      method: constant
+      constant_value: 0.0
+      file:
+      column: 2
+      tidal:
+        amp_1: 0.0
+        phase_1: 0.0
+        amp_2: 0.0
+        phase_2: 0.0
+    dpdy:
+      method: constant
+      constant_value: 0.0
+      file: ext_press.dat
+      column: 3
+      tidal:
+        amp_1: 0.0
+        phase_1: 0.0
+        amp_2: 0.0
+        phase_2: 0.0
+    h:
+      method: constant
+      constant_value: 0.0
+      file: ext_press.dat
+      column: 1
+    period_1: 44714.0
+    period_2: 43200.0
+  zeta:
+    method: constant
+    constant_value: 0.0
+    file: zeta.dat
+    column: 1
+    tidal:
+      period_1: 44714.0
+      amp_1: 0.0
+      phase_1: 0.0
+      period_2: 43200.0
+      amp_2: 0.0
+      phase_2: 0.0
+  w:
+    max:
+      method: off
+      constant_value: 0.0
+      file:
+      column: 1
+    height:
+      method: constant
+      constant_value: 0.0
+      file:
+      column: 1
+    adv_discr: p2_pdm
+  int_pressure:
+    t_adv: false
+    s_adv: false
+    gradients:
+      dtdx:
+        method: off
+        constant_value: 0.0
+        file:
+        column: 1
+      dtdy:
+        method: off
+        constant_value: 0.0
+        file:
+        column: 1
+      dsdx:
+        method: off
+        constant_value: 0.0
+        file:
+        column: 1
+      dsdy:
+        method: off
+        constant_value: 0.0
+        file:
+        column: 1
+fabm:
+  use: true
+  freshwater_impact: true
+  feedbacks:
+    shade: false
+    albedo: false
+    surface_drag: false
+  repair_state: true
+  input:
+    ECO/no3:
+      method: file
+      file: nitrate.dat
+      scale_factor: 14
+      relax_tau: 86400*1.0E+15
+    ECO/si:
+      method: file
+      file: silicate.dat
+      scale_factor: 28.08
+      relax_tau: 86400*1.0E+15
+restart:
+  load: false
+output:
+  results:
+    format: netcdf
+    time_unit: day
+    time_step: 1
+    time_method: mean
+    variables:
+    - source: /*
+equation_of_state:
+  linear:
+    T0: 10.0
+    S0: 35.0
+    p0: 0.0
+    dtr0: -0.17
+    dsr0: 0.78
+  method: full_teos-10

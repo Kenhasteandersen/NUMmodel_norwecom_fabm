@@ -2,3 +2,6 @@
 	path = norwecome2e_fabm/NUMmodel
 	url = https://github.com/Kenhasteandersen/NUMmodel.git
 	branch = Develop
+[submodule "gotm"]
+	path = gotm
+	url = https://github.com/gotm-model/code.git
